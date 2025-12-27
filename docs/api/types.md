@@ -265,3 +265,42 @@ pub const ParsingMode = enum {
     interspersed,   // Allow mixed order
 };
 ```
+
+## SchemaBuilder
+
+A fluent builder API for constructing `CommandSpec` schemas typically used for advanced or programmatic schema creation.
+
+```zig
+pub const SchemaBuilder = struct {
+    // ... internal fields
+};
+```
+
+### Methods
+
+| Method | Return | Description |
+|--------|--------|-------------|
+| `init(allocator, name)` | `SchemaBuilder` | Initialize a new builder |
+| `deinit()` | `void` | Free resources |
+| `setVersion(ver)` | `*SchemaBuilder` | Set version string |
+| `setDescription(desc)` | `*SchemaBuilder` | Set description |
+| `setEpilog(ep)` | `*SchemaBuilder` | Set epilog text |
+| `addArg(spec)` | `!*SchemaBuilder` | Add a full argument specification |
+| `addFlag(name, short, help)` | `!*SchemaBuilder` | Add a boolean flag |
+| `addOption(name, short, help)` | `!*SchemaBuilder` | Add a value option |
+| `addPositional(name, help)` | `!*SchemaBuilder` | Add a positional argument |
+| `addSubcommand(spec)` | `!*SchemaBuilder` | Add a subcommand |
+| `build()` | `CommandSpec` | Build and return the final spec |
+
+### Example
+
+```zig
+var builder = args.SchemaBuilder.init(allocator, "myapp");
+defer builder.deinit();
+
+_ = try builder.setVersion("1.0").setDescription("My App")
+    .addFlag("verbose", 'v', "Enable verbose output");
+
+const spec = builder.build();
+// Use spec with Parser...
+```

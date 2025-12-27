@@ -6,7 +6,7 @@ hero:
   text: "Command-Line Argument Parsing for Zig"
   tagline: Fast, powerful, and developer-friendly CLI argument parsing
   image:
-    src: /logo.svg
+    src: /logo.png
     alt: args.zig
   actions:
     - theme: brand
