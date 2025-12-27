@@ -15,11 +15,37 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
-      - uses: mlugg/setup-zig@v2
+      - uses: mlugg/setup-zig@v1
         with:
-          version: 0.15.1
+          version: 0.15.0
       - name: Run Tests
         run: zig build test
+
+  bench:
+    name: Run Benchmarks
+    needs: test
+    runs-on: ubuntu-latest
+    outputs:
+      bench_output: ${{ steps.run_bench.outputs.bench_output }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mlugg/setup-zig@v1
+        with:
+          version: 0.15.0
+      - name: Run Benchmarks
+        id: run_bench
+        run: |
+          # Run benchmarks (generates benchmark-results.md)
+          zig build bench || true
+          
+          # Prepare output for release body from the generated markdown file
+          echo "bench_output<<EOF" >> $GITHUB_OUTPUT
+          if [ -f benchmark-results.md ]; then
+            cat benchmark-results.md >> $GITHUB_OUTPUT
+          else
+            echo "No benchmark table found." >> $GITHUB_OUTPUT
+          fi
+          echo "EOF" >> $GITHUB_OUTPUT
 
   build-library:
     name: Build Library (${{ matrix.target }})
@@ -42,9 +68,9 @@ jobs:
           - arm-freestanding
     steps:
       - uses: actions/checkout@v4
-      - uses: mlugg/setup-zig@v2
+      - uses: mlugg/setup-zig@v1
         with:
-          version: 0.15.1
+          version: 0.15.0
       
       - name: Build Library
         run: zig build -Doptimize=ReleaseSafe -Dtarget=${{ matrix.target }}
@@ -59,16 +85,18 @@ jobs:
             # Copy unix static lib
             cp zig-out/lib/libargs.a release/libargs-${{ matrix.target }}.a || true
           fi
+          # Only library artifacts are prepared for upload
 
       - name: Upload Release Artifacts
         run: |
+          # Upload all prepared artifacts to the GitHub Release
           gh release upload "${{ github.event.release.tag_name }}" release/* --clobber || true
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
   update-release:
     name: Update Release Description
-    needs: test
+    needs: [test, bench]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -77,9 +105,9 @@ jobs:
         id: get_url
         run: echo "url=https://github.com/${{ github.repository }}/archive/refs/tags/${{ github.event.release.tag_name }}.tar.gz" >> $GITHUB_OUTPUT
 
-      - uses: mlugg/setup-zig@v2
+      - uses: mlugg/setup-zig@v1
         with:
-          version: 0.15.1
+          version: 0.15.0
 
       - name: Calculate Hash
         id: calc_hash
@@ -130,17 +158,17 @@ jobs:
 
             | Platform | Architecture | File |
             |----------|--------------|------|
-            | Windows | x86_64 | [args-x86_64-windows.lib](https://github.com/muhammad-fiaz/args.zig/releases/download/${{ github.event.release.tag_name }}/args-x86_64-windows.lib) |
-            | Windows | x86 | [args-x86-windows.lib](https://github.com/muhammad-fiaz/args.zig/releases/download/${{ github.event.release.tag_name }}/args-x86-windows.lib) |
-            | Linux | x86_64 | [libargs-x86_64-linux.a](https://github.com/muhammad-fiaz/args.zig/releases/download/${{ github.event.release.tag_name }}/libargs-x86_64-linux.a) |
-            | Linux | x86 | [libargs-x86-linux.a](https://github.com/muhammad-fiaz/args.zig/releases/download/${{ github.event.release.tag_name }}/libargs-x86-linux.a) |
-            | Linux | aarch64 (ARM64) | [libargs-aarch64-linux.a](https://github.com/muhammad-fiaz/args.zig/releases/download/${{ github.event.release.tag_name }}/libargs-aarch64-linux.a) |
-            | macOS | x86_64 (Intel) | [libargs-x86_64-macos.a](https://github.com/muhammad-fiaz/args.zig/releases/download/${{ github.event.release.tag_name }}/libargs-x86_64-macos.a) |
-            | macOS | aarch64 (Apple Silicon) | [libargs-aarch64-macos.a](https://github.com/muhammad-fiaz/args.zig/releases/download/${{ github.event.release.tag_name }}/libargs-aarch64-macos.a) |
-            | Bare Metal | x86_64 | [libargs-x86_64-freestanding.a](https://github.com/muhammad-fiaz/args.zig/releases/download/${{ github.event.release.tag_name }}/libargs-x86_64-freestanding.a) |
-            | Bare Metal | aarch64 | [libargs-aarch64-freestanding.a](https://github.com/muhammad-fiaz/args.zig/releases/download/${{ github.event.release.tag_name }}/libargs-aarch64-freestanding.a) |
-            | Bare Metal | RISC-V 64 | [libargs-riscv64-freestanding.a](https://github.com/muhammad-fiaz/args.zig/releases/download/${{ github.event.release.tag_name }}/libargs-riscv64-freestanding.a) |
-            | Bare Metal | ARM | [libargs-arm-freestanding.a](https://github.com/muhammad-fiaz/args.zig/releases/download/${{ github.event.release.tag_name }}/libargs-arm-freestanding.a) |
+            | Windows | x86_64 | [args-x86_64-windows.lib](https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/args-x86_64-windows.lib) |
+            | Windows | x86 | [args-x86-windows.lib](https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/args-x86-windows.lib) |
+            | Linux | x86_64 | [libargs-x86_64-linux.a](https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/libargs-x86_64-linux.a) |
+            | Linux | x86 | [libargs-x86-linux.a](https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/libargs-x86-linux.a) |
+            | Linux | aarch64 (ARM64) | [libargs-aarch64-linux.a](https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/libargs-aarch64-linux.a) |
+            | macOS | x86_64 (Intel) | [libargs-x86_64-macos.a](https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/libargs-x86_64-macos.a) |
+            | macOS | aarch64 (Apple Silicon) | [libargs-aarch64-macos.a](https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/libargs-aarch64-macos.a) |
+            | Bare Metal | x86_64 | [libargs-x86_64-freestanding.a](https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/libargs-x86_64-freestanding.a) |
+            | Bare Metal | aarch64 | [libargs-aarch64-freestanding.a](https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/libargs-aarch64-freestanding.a) |
+            | Bare Metal | RISC-V 64 | [libargs-riscv64-freestanding.a](https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/libargs-riscv64-freestanding.a) |
+            | Bare Metal | ARM | [libargs-arm-freestanding.a](https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/libargs-arm-freestanding.a) |
 
             ### 🛠️ Using Prebuilt Libraries
 
