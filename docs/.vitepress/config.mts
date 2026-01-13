@@ -1,4 +1,5 @@
 import { defineConfig } from "vitepress";
+import llmstxt from "vitepress-plugin-llms";
 
 // Site configuration
 export const SITE_URL = "https://muhammad-fiaz.github.io/args.zig";
@@ -22,9 +23,13 @@ export default defineConfig({
   base: "/args.zig/",
   lastUpdated: true,
   cleanUrls: true,
-
+  
   sitemap: {
     hostname: SITE_URL,
+  },
+
+  vite: {
+    plugins: [llmstxt()],
   },
 
   head: [
@@ -39,7 +44,7 @@ export default defineConfig({
     ["meta", { name: "language", content: "English" }],
     ["meta", { name: "revisit-after", content: "7 days" }],
     ["meta", { name: "generator", content: "VitePress" }],
-
+    
     // Open Graph / Facebook
     ["meta", { property: "og:type", content: "website" }],
     ["meta", { property: "og:url", content: SITE_URL }],
@@ -62,77 +67,6 @@ export default defineConfig({
 
     // Canonical URL
     ["link", { rel: "canonical", href: SITE_URL }],
-
-    // JSON-LD Schema for Software Application
-    [
-      "script",
-      { type: "application/ld+json" },
-      JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "args.zig",
-        "applicationCategory": "DeveloperApplication",
-        "operatingSystem": "Cross-platform",
-        "programmingLanguage": "Zig",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "USD"
-        },
-        "author": {
-          "@type": "Person",
-          "name": "Muhammad Fiaz",
-          "url": "https://github.com/muhammad-fiaz"
-        },
-        "description": SITE_DESCRIPTION,
-        "url": SITE_URL,
-        "downloadUrl": "https://github.com/muhammad-fiaz/args.zig",
-        "softwareVersion": "0.0.2",
-        "license": "https://opensource.org/licenses/MIT"
-      })
-    ],
-
-    // JSON-LD Schema for Documentation
-    [
-      "script",
-      { type: "application/ld+json" },
-      JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "TechArticle",
-        "headline": "args.zig Documentation",
-        "description": SITE_DESCRIPTION,
-        "author": {
-          "@type": "Person",
-          "name": "Muhammad Fiaz"
-        },
-        "publisher": {
-          "@type": "Person",
-          "name": "Muhammad Fiaz"
-        },
-        "mainEntityOfPage": {
-          "@type": "WebPage",
-          "@id": SITE_URL
-        },
-        "image": `${SITE_URL}/cover.png`
-      })
-    ],
-
-    // JSON-LD Schema for Organization
-    [
-      "script",
-      { type: "application/ld+json" },
-      JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "Muhammad Fiaz",
-        "url": "https://github.com/muhammad-fiaz",
-        "logo": `${SITE_URL}/logo.png`,
-        "sameAs": [
-          "https://github.com/muhammad-fiaz",
-          "https://twitter.com/muhammadfiaz_"
-        ]
-      })
-    ],
 
     // Favicons
     ["link", { rel: "icon", href: "/args.zig/favicon.ico" }],
@@ -176,7 +110,7 @@ gtag('config', '${GA_ID}');`,
           ],
         ] as [string, Record<string, string>, string][])
       : []),
-    
+
     // Google AdSense
     [
       "script",
@@ -192,23 +126,150 @@ gtag('config', '${GA_ID}');`,
 
   transformPageData(pageData) {
     const pageTitle = pageData.title || SITE_NAME;
-    const pageDescription = pageData.frontmatter?.description || SITE_DESCRIPTION;
-    const canonicalUrl = `${SITE_URL}/${pageData.relativePath.replace(/\.md$/, '.html').replace(/index\.html$/, '')}`;
+    const pageDescription = pageData.description || SITE_DESCRIPTION;
+    const canonicalUrl = `${SITE_URL}/${pageData.relativePath.replace(/((^|\/)index)?\.md$/, '$2').replace(/\.md$/, '')}`;
 
     pageData.frontmatter.head ??= [];
-    
-    // Add canonical and OG tags for each page
     pageData.frontmatter.head.push(
       ["link", { rel: "canonical", href: canonicalUrl }],
       ["meta", { property: "og:title", content: `${pageTitle} | ${SITE_NAME}` }],
-      ["meta", { property: "og:url", content: canonicalUrl }],
-      ["meta", { property: "og:description", content: pageDescription }],
-      ["meta", { property: "og:image", content: `${SITE_URL}/cover.png` }],
-      ["meta", { name: "twitter:title", content: `${pageTitle} | ${SITE_NAME}` }],
-      ["meta", { name: "twitter:description", content: pageDescription }],
-      ["meta", { name: "twitter:image", content: `${SITE_URL}/cover.png` }],
-      ["meta", { name: "description", content: pageDescription }]
+      ["meta", { property: "og:url", content: canonicalUrl }]
     );
+
+    if (pageData.frontmatter.description) {
+      pageData.frontmatter.head.push(
+        ["meta", { property: "og:description", content: pageData.frontmatter.description }],
+        ["meta", { name: "description", content: pageData.frontmatter.description }]
+      );
+    }
+
+    // Dynamic JSON-LD Schema
+    const isHome = pageData.relativePath === 'index.md';
+    const lastUpdated = pageData.lastUpdated
+      ? new Date(pageData.lastUpdated).toISOString()
+      : new Date().toISOString();
+    
+    // Base Graph
+    const graph: any[] = [];
+
+    // 1. WebSite Schema
+    if (isHome) {
+      graph.push({
+        "@type": "WebSite",
+        "name": SITE_NAME,
+        "url": SITE_URL,
+        "description": SITE_DESCRIPTION,
+        "author": {
+          "@type": "Person",
+          "name": "Muhammad Fiaz",
+          "url": "https://github.com/muhammad-fiaz"
+        }
+      });
+    }
+
+    // 2. Main Entity Schema
+    const authorSchema = {
+      "@type": "Person",
+      "name": "Muhammad Fiaz",
+      "url": "https://muhammadfiaz.com",
+      "sameAs": [
+        "https://github.com/muhammad-fiaz",
+        "https://www.linkedin.com/in/muhammad-fiaz-",
+        "https://x.com/muhammadfiaz_"
+      ]
+    };
+
+    const primarySchema: Record<string, any> = {
+      "@type": isHome ? "SoftwareApplication" : "TechArticle",
+      "name": isHome ? SITE_NAME : pageTitle,
+      "description": pageDescription,
+      "url": canonicalUrl,
+      "image": `${SITE_URL}/cover.png`,
+      "author": authorSchema,
+      "publisher": {
+        "@type": "Organization",
+        "name": SITE_NAME,
+        "url": SITE_URL,
+        "logo": {
+          "@type": "ImageObject",
+          "url": `${SITE_URL}/logo.png`
+        }
+      }
+    };
+
+    if (isHome) {
+      Object.assign(primarySchema, {
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Cross-platform",
+        "programmingLanguage": "Zig",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "downloadUrl": "https://github.com/muhammad-fiaz/args.zig",
+        "softwareVersion": "0.0.2", 
+        "license": "https://opensource.org/licenses/MIT"
+      });
+    } else {
+      const pathParts = pageData.relativePath.split('/');
+      const section = pathParts.length > 1 
+        ? pathParts[0].charAt(0).toUpperCase() + pathParts[0].slice(1) 
+        : 'Documentation';
+
+      Object.assign(primarySchema, {
+        "headline": pageTitle,
+        "articleSection": section,
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": canonicalUrl
+        },
+        "datePublished": "2025-01-01T00:00:00Z",
+        "dateModified": lastUpdated
+      });
+    }
+    graph.push(primarySchema);
+
+    // 3. BreadcrumbList Schema
+    const breadcrumbs: any[] = [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": SITE_URL
+      }
+    ];
+
+    if (!isHome) {
+      const pathParts = pageData.relativePath.replace(/\.md$/, '').split('/');
+      let currentPath = SITE_URL;
+      
+      pathParts.forEach((part, index) => {
+        currentPath += `/${part}`;
+        const name = part.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+        
+        breadcrumbs.push({
+          "@type": "ListItem",
+          "position": index + 2,
+          "name": name,
+          "item": index === pathParts.length - 1 ? canonicalUrl : currentPath
+        });
+      });
+    }
+
+    graph.push({
+      "@type": "BreadcrumbList",
+      "itemListElement": breadcrumbs
+    });
+
+    pageData.frontmatter.head.push([
+      "script",
+      { type: "application/ld+json" },
+      JSON.stringify({
+        "@context": "https://schema.org",
+        "@graph": graph
+      })
+    ]);
   },
 
   themeConfig: {
@@ -243,7 +304,7 @@ gtag('config', '${GA_ID}');`,
           ],
         },
         {
-          text: "Advanced",
+          text: "Advanced Topics",
           items: [
             { text: "Environment Variables", link: "/guide/environment-variables" },
             { text: "Argument Groups", link: "/guide/groups" },
