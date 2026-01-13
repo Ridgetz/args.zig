@@ -132,6 +132,7 @@ zig build run -- -n Bob -e
 
 # View help
 zig build run -- --help
+# The help output is formatted for better understanding 🎨
 ```
 
 ## Version Information

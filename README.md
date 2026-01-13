@@ -20,7 +20,7 @@
 
 <p><em>A fast, powerful, and developer-friendly command-line argument parsing library for Zig.</em></p>
 
-**Documentation | API Reference | Quick Start | Contributing**
+[**Documentation**](https://muhammad-fiaz.github.io/args.zig/) | [**API Reference**](https://muhammad-fiaz.github.io/args.zig/api/) | [**Quick Start**](#release-installation-recommended) | [**Contributing**](CONTRIBUTING.md)
 
 
 </div>
@@ -33,16 +33,16 @@ A production-grade, high-performance command-line argument parsing library for Z
 
 ## Features
 
-- **Fast & Zero Allocations** - Minimal memory footprint with efficient parsing
-- **Intuitive API** - Python argparse-inspired fluent interface
-- **Auto-Generated Help** - Beautiful, colorized help text out of the box
-- **Shell Completions** - Generate completions for Bash, Zsh, Fish, PowerShell
-- **Environment Variables** - Fallback to env vars for configuration
-- **Subcommands** - Full support for Git-style subcommands
+- [**Fast & Zero Allocations**](https://muhammad-fiaz.github.io/args.zig/guide/efficiency) - Minimal memory footprint with efficient parsing
+- [**Intuitive API**](https://muhammad-fiaz.github.io/args.zig/guide/getting-started) - Python argparse-inspired fluent interface
+- [**Auto-Generated Help**](https://muhammad-fiaz.github.io/args.zig/guide/getting-started) - Formatted help text for better understanding out of the box
+- [**Shell Completions**](https://muhammad-fiaz.github.io/args.zig/guide/shell-completions) - Generate completions for Bash, Zsh, Fish, PowerShell
+- [**Environment Variables**](https://muhammad-fiaz.github.io/args.zig/guide/environment-variables) - Fallback to env vars for configuration
+- [**Subcommands**](https://muhammad-fiaz.github.io/args.zig/guide/subcommands) - Full support for Git-style subcommands
 - **Colored Output** - ANSI color support for beautiful terminal output
-- **Update Checker** - Automatic non-blocking update notifications (enabled by default)
-- **Comprehensive Validation** - Type checking, choices, and custom validators
-- **Well Tested** - Extensive test coverage across all modules
+- [**Update Checker**](https://muhammad-fiaz.github.io/args.zig/guide/updates) - Automatic non-blocking update notifications (enabled by default)
+- [**Comprehensive Validation**](https://muhammad-fiaz.github.io/args.zig/guide/validation) - Type checking, choices, and custom validators
+- [**Well Tested**](CONTRIBUTING.md#running-tests) - Extensive test coverage across all modules
 
 ### Release Installation (Recommended)
 
