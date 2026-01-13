@@ -20,10 +20,8 @@
 
 <p><em>A fast, powerful, and developer-friendly command-line argument parsing library for Zig.</em></p>
 
-<b>📚 <a href="https://muhammad-fiaz.github.io/args.zig/">Documentation</a> |
-<a href="https://muhammad-fiaz.github.io/args.zig/api/parser">API Reference</a> |
-<a href="https://muhammad-fiaz.github.io/args.zig/guide/quick-start">Quick Start</a> |
-<a href="CONTRIBUTING.md">Contributing</a></b>
+**Documentation | API Reference | Quick Start | Contributing**
+
 
 </div>
 
@@ -31,22 +29,20 @@
 
 A production-grade, high-performance command-line argument parsing library for Zig, inspired by Python's argparse with a clean, intuitive, and developer-friendly API.
 
-**⭐️ If you love `args.zig`, make sure to give it a star! ⭐️**
+**If you love `args.zig`, make sure to give it a star!**
 
-## ✨ Features
+## Features
 
-- 🚀 **Fast & Zero Allocations** - Minimal memory footprint with efficient parsing
-- 🎯 **Intuitive API** - Python argparse-inspired fluent interface
-- 📝 **Auto-Generated Help** - Beautiful, colorized help text out of the box
-- 🔤 **Shell Completions** - Generate completions for Bash, Zsh, Fish, PowerShell
-- 🌐 **Environment Variables** - Fallback to env vars for configuration
-- 📦 **Subcommands** - Full support for Git-style subcommands
-- 🎨 **Colored Output** - ANSI color support for beautiful terminal output
-- 🔄 **Update Checker** - Optional non-blocking update notifications from GitHub
-- ✅ **Comprehensive Validation** - Type checking, choices, and custom validators
-- 🧪 **Well Tested** - Extensive test coverage across all modules
-
-## 📦 Installation
+- **Fast & Zero Allocations** - Minimal memory footprint with efficient parsing
+- **Intuitive API** - Python argparse-inspired fluent interface
+- **Auto-Generated Help** - Beautiful, colorized help text out of the box
+- **Shell Completions** - Generate completions for Bash, Zsh, Fish, PowerShell
+- **Environment Variables** - Fallback to env vars for configuration
+- **Subcommands** - Full support for Git-style subcommands
+- **Colored Output** - ANSI color support for beautiful terminal output
+- **Update Checker** - Automatic non-blocking update notifications (enabled by default)
+- **Comprehensive Validation** - Type checking, choices, and custom validators
+- **Well Tested** - Extensive test coverage across all modules
 
 ### Release Installation (Recommended)
 
@@ -77,7 +73,7 @@ const args_dep = b.dependency("args", .{
 exe.root_module.addImport("args", args_dep.module("args"));
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ```zig
 const std = @import("std");
@@ -127,7 +123,7 @@ pub fn main() !void {
 }
 ```
 
-## 📖 Examples
+## Examples
 
 ### Flags and Options
 
@@ -199,15 +195,59 @@ try parser.addOption("token", .{
 });
 ```
 
-## ⚙️ Configuration
-
-### Disable Update Checker
+### Argument Groups
 
 ```zig
-// Global disable
+// Create a named group
+try parser.addArgumentGroup("Server Options", .{
+    .description = "Configuration for the server",
+});
+
+// Arguments added after will belong to this group
+try parser.addOption("host", .{ .help = "Bind address" });
+try parser.addOption("port", .{ .value_type = .int, .help = "Port number" });
+
+// Reset to default (ungrouped)
+parser.setGroup(null);
+```
+
+### Mutually Exclusive Groups
+
+```zig
+try parser.addArgumentGroup("Mode", .{
+    .exclusive = true,
+    .required = true, // User MUST choose exactly one
+});
+
+try parser.addFlag("interactive", .{ .short = 'i' });
+try parser.addFlag("batch", .{ .short = 'b' });
+```
+
+### Custom Validation
+
+```zig
+fn validateUser(val: []const u8) args.validation.ValidationResult {
+    if (val.len < 3) return .{ .err = "username too short" };
+    return .{ .ok = {} };
+}
+
+try parser.addOption("user", .{
+    .help = "Username",
+    .validator = validateUser,
+});
+```
+
+## Configuration
+
+### Update Checker
+
+The update checker is **enabled by default** to keep you informed about new features and fixes. To disable it:
+
+```zig
+// Method 1: Global disable (Recommended)
 args.disableUpdateCheck();
 
-// Or per-parser
+// Method 2: Per-parser configuration
 var parser = try args.ArgumentParser.init(allocator, .{
     .name = "myapp",
     .config = .{ .check_for_updates = false },
@@ -223,7 +263,7 @@ var parser = try args.ArgumentParser.init(allocator, .{
 });
 ```
 
-## 🏗️ Building
+## Building
 
 ```bash
 # Build library
@@ -243,7 +283,7 @@ zig build bench
 zig build fmt
 ```
 
-## 📊 Benchmarks
+## Benchmarks
 
 Run benchmarks to see the performance:
 
@@ -268,15 +308,16 @@ Typical results on modern hardware (10,000 iterations):
 
 *Results vary based on hardware and system load. Tested on Windows x86_64 with Zig 0.15.1.*
 
-## 📚 Documentation
+## Documentation
 
 Full documentation is available at [muhammad-fiaz.github.io/args.zig](https://muhammad-fiaz.github.io/args.zig/).
 
 - [Getting Started](https://muhammad-fiaz.github.io/args.zig/guide/getting-started)
 - [API Reference](https://muhammad-fiaz.github.io/args.zig/api/parser)
 - [Examples](https://muhammad-fiaz.github.io/args.zig/examples/)
+- [Update Checker](https://muhammad-fiaz.github.io/args.zig/guide/updates)
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details.
 
@@ -288,23 +329,21 @@ Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md)
 
 See our [Code of Conduct](CODE_OF_CONDUCT.md) for community guidelines.
 
-## 🔒 Security
+## Security
 
 For security concerns, please see our [Security Policy](SECURITY.md).
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 💖 Support
+## Support
 
 If you find this project helpful, consider supporting it:
 
-- ⭐ Star this repository
-- 🐛 Report bugs and suggest features
-- 💰 [Sponsor on GitHub](https://github.com/sponsors/muhammad-fiaz)
-- ☕ [Buy me a coffee](https://pay.muhammadfiaz.com)
+- Star this repository
+- Report bugs and suggest features
+- [Sponsor on GitHub](https://github.com/sponsors/muhammad-fiaz)
+- [Buy me a coffee](https://pay.muhammadfiaz.com)
 
----
 
-Made with ❤️ by [Muhammad Fiaz](https://github.com/muhammad-fiaz)
