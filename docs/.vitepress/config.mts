@@ -87,7 +87,7 @@ export default defineConfig({
         "description": SITE_DESCRIPTION,
         "url": SITE_URL,
         "downloadUrl": "https://github.com/muhammad-fiaz/args.zig",
-        "softwareVersion": "0.0.1",
+        "softwareVersion": "0.0.2",
         "license": "https://opensource.org/licenses/MIT"
       })
     ],

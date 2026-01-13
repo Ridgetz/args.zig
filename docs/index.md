@@ -88,10 +88,10 @@ pub fn main() !void {
 
 ### Release Installation (Recommended)
 
-Install the latest stable release (v0.0.1):
+Install the latest stable release (v0.0.2):
 
 ```bash
-zig fetch --save https://github.com/muhammad-fiaz/args.zig/archive/refs/tags/v0.0.1.tar.gz
+zig fetch --save https://github.com/muhammad-fiaz/args.zig/archive/refs/tags/v0.0.2.tar.gz
 ```
 
 ### Nightly Installation
@@ -116,5 +116,5 @@ exe.root_module.addImport("args", args_dep.module("args"));
 
 ## Current Version
 
-- **Package Version:** 0.0.1
-- **Minimum Zig Version:** 0.15.1
+- **Package Version:** 0.0.2
+- **Minimum Zig Version:** 0.15.0

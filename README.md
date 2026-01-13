@@ -49,7 +49,7 @@ A production-grade, high-performance command-line argument parsing library for Z
 Install the latest stable release (v0.0.1):
 
 ```bash
-zig fetch --save https://github.com/muhammad-fiaz/args.zig/archive/refs/tags/v0.0.1.tar.gz
+zig fetch --save https://github.com/muhammad-fiaz/args.zig/archive/refs/tags/v0.0.2.tar.gz
 ```
 
 ### Nightly Installation
